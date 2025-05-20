@@ -27,7 +27,7 @@ Check the [GLIBC.md](GLIBC.md) file for a list of glibc versions used in major L
 
 Images use stable and nightly versions of Rust configured via the `rustup` toolchain manager.
 
-For a list of available images, see [GitHub Packages](https://github.com/pirafrank/packages).
+For a list of available images, see [GitHub Packages](https://github.com/pirafrank/rust-docker-images/pkgs/container/rust).
 
 ## License
 
