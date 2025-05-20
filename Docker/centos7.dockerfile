@@ -1,0 +1,50 @@
+FROM centos:7
+
+# CentOS 7 features glibc version 2.17, which is the minimum required for Rust at the moment.
+
+ARG USER_UID=1000
+ARG RUST_VERSION="1.87.0"
+
+# update deprecated CentOS 7 repositories to use new vault endpoint
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Base.repo && \
+  sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Base.repo
+
+RUN yum clean all && \
+  yum -y update
+
+RUN yum install -y \
+    curl \
+    gcc \
+    gcc-c++ \
+    pkgconfig \
+    ca-certificates \
+    git \
+    openssl-devel \
+    make \
+    tzdata \
+    which \
+    tar \
+    gzip \
+    bzip2 \
+    sudo \
+    && yum clean all
+
+RUN echo 'add user and change default shell' \
+  && useradd -m -d /home/work -s /bin/bash --uid $USER_UID work \
+  && echo work ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/work \
+  && chmod 0440 /etc/sudoers.d/work \
+  && echo "root:root" | chpasswd \
+  && echo "work:work" | chpasswd
+
+ENV LANG="en_US.UTF-8" LC_ALL="C" LANGUAGE="en_US.UTF-8"
+ENV TZ=Europe/Rome
+
+USER work
+WORKDIR /home/work
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- --default-toolchain $RUST_VERSION -y
+ENV PATH="/home/work/.cargo/bin:${PATH}"
+
+# Add a default workdir
+WORKDIR /home/work/project
