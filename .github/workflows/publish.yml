@@ -50,6 +50,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
+        env:
+          DOCKER_USER_UID: 1910
         run: |
           name=$(basename ${{ matrix.dockerfile }} .dockerfile)
           name=$(echo "$name" | tr '_' '-')
@@ -58,6 +60,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64 \
             --push \
+            --build-arg USER_UID=${{ env.DOCKER_USER_UID }} \
             --build-arg RUST_VERSION=${{ matrix.rust_version }} \
             -t ghcr.io/pirafrank/rust:$rust_version-$name-latest \
             -t ghcr.io/pirafrank/rust:$rust_version-$name-$today \
