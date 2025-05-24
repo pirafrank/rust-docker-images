@@ -52,6 +52,7 @@ jobs:
       - name: Build Docker image
         run: |
           name=$(basename ${{ matrix.dockerfile }} .dockerfile)
+          name=$(echo "$name" | tr '_' '-')
           today=$(date +%Y%m%d)
           rust_version=${{ matrix.rust_version }}
           docker buildx build \

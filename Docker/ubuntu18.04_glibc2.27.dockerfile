@@ -1,6 +1,6 @@
-FROM ubuntu:focal
+FROM ubuntu:18.04
 
-# Ubuntu 20.04 Focal features glibc version 2.31.
+# Ubuntu 18.04 Bionic features glibc version 2.27.
 
 ARG USER_UID=1000
 ARG RUST_VERSION="1.87.0"

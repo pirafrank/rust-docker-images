@@ -26,6 +26,68 @@ grep -oE '[0-9]{1,}\.[0-9]{1,}(\.[0-9]{1,})?' \
 
 where `<your-binary>` is the path to your compiled Rust binary.
 
+## glibc major changes for Rust developers
+
+Bellow a list of glibc versions since 2.17 that introduced significant changes or compatibility shifts meaninful for Rust developers compiling towards `--gnu` targets.
+
+The focus is on compatibility, dynamic linking behavior, system call availability, and features affecting build reproducibility or minimum supported glibc versions for distributing Rust binaries.
+
+
+### glibc 2.17 (Dec 2012)
+
+- Baseline for many enterprise systems (e.g., RHEL 7).
+- Often chosen as the lowest common denominator for prebuilt Rust binaries targeting GNU.
+- Introduced support for `getrandom()` via syscall, used in Rust via `rand` or `getrandom` crates (though not exposed in glibc until 2.25).
+
+
+### glibc 2.25 (Feb 2017)
+
+- `clock_gettime()` and others no longer require linking to `-lrt`.
+  - Rust crates using `std::time::Instant`, `std::thread::sleep`, etc., indirectly benefit.
+- Introduced `getrandom()` wrapper—previously, Rust had to use direct syscalls on Linux.
+
+
+### glibc 2.26 (Aug 2017)
+
+- Improved thread scalability via scalable `malloc`.
+- Added `explicit_bzero()` – useful for crates handling cryptographic zeroing (adopted in `zeroize`).
+
+
+### glibc 2.27 (Feb 2018)
+
+- Further optimized `malloc` and TLS behavior.
+- Default in Ubuntu 18.04 LTS, common in CI environments.
+
+
+### glibc 2.28 (Aug 2018)
+
+- Added `gettid()` and `statx()` wrappers (used in some logging/debugging crates and performance tools).
+
+
+### glibc 2.31 (Feb 2020)
+
+- Enabled security hardening flags and stack protection by default—relevant if linking Rust with `cc`-built C code.
+- Improved performance for `memcpy`, `memset`—impacts `Vec`, `Box`, and other heap-using types.
+
+
+### glibc 2.34 (Aug 2021)
+
+- Major milestone: Unified `libpthread`, `librt`, `libdl`, and `libresolv` into `libc.so.6`.
+  - Reduces dynamic linker complexity and dependency footprint.
+  - Rust static builds benefit due to simplified dynamic symbol resolution.
+- Introduced support for `close_range()` syscall—used in modern sandboxing crates and runtime environments.
+
+
+### glibc 2.36 (Aug 2022)
+
+- Removed support for `LD_PREFER_MAP_32BIT_EXEC`, strengthening ASLR and making builds more secure by default.
+- Added wrappers for new syscalls (e.g., `futex2`) used in async runtimes (`tokio`, `smol`) via FFI.
+
+### glibc 2.37 (Feb 2023)
+
+- Expanded support for additional targets (like `loongarch`).
+- Continued enhancements in dynamic linker, locale, and ABI compatibility—all of which reduce friction when building and distributing Rust software on mixed-libc environments.
+
 ## glibc versions across major Linux distributions
 
 ### Ubuntu
